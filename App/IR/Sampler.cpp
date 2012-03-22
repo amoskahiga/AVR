@@ -1,5 +1,5 @@
-#include "../../Shared/Bit.h"
 #include "Sampler.h"
+#include "../../Shared/Bit.h"
 #include "../../Shared/UART.h"
 
 void Sampler::samplePinInput()
@@ -30,6 +30,9 @@ void Sampler::setPinOutput()
     if (!parsingData && !UART::inputBuffer.isEmpty()) {
         data = UART::inputBuffer.getChar();
         parsingData = true;
+    }
+    else if (UART::inputBuffer.isEmpty()) {
+        processingInput = false;
     }
 
     if (parsingData) {

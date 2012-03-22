@@ -2,6 +2,14 @@
 ###########
 *.user
 
+# AVR #
+#######
+*.lst
+*.hex
+*.out
+*.map
+*.s
+
 # Compiled source #
 ###################
 *.com

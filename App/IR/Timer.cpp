@@ -2,18 +2,29 @@
 #include "Sampler.h"
 #include "Timer.h"
 
-bool Timer::dataReady = false;
-unsigned int Timer::prescaler = 0;
-unsigned char Timer::value = 0;
-
 ISR(TIMER0_OVF_vect)
 {
-    if (Timer::prescaler > 0) {
-        --Timer::prescaler;
-    }
-    else {
-        Sampler& sampler = Sampler::getInstance();
+    const unsigned int MAX_PRESCALER = 14;
+    static unsigned int prescaler = MAX_PRESCALER;
+
+    Timer& timer = Timer::getInstance();
+    Sampler& sampler = Sampler::getInstance();
+
+    if (timer.speed == Timer::Fast) {
+
         sampler.samplePinInput();
         sampler.setPinOutput();
+    }
+    else {  // In Slow mode
+
+        if (prescaler > 0) {
+            --prescaler;
+        }
+
+        if (prescaler == 0) {
+            // Re-enable the fast timer
+            prescaler = MAX_PRESCALER;
+            timer.enable(Timer::Fast);
+        }
     }
 }

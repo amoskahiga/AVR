@@ -10,6 +10,7 @@ class Sampler
 public:
 
     bool dataReady;
+    bool processingInput;
     unsigned char value;
 
     void samplePinInput();

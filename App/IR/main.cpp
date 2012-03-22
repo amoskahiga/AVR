@@ -5,9 +5,13 @@
 
 #include "LED.h"
 #include "Timer.h"
+#include "Sampler.h"
 #include "../../Shared/UART.h"
 
 const unsigned int delayDuration = 1000; // In milliseconds
+
+Timer& timer = Timer::getInstance();
+Sampler& sampler = Sampler::getInstance();
 
 /*
  * Do all the startup-time peripheral initializations.
@@ -23,8 +27,8 @@ static void ioinit(void)
     DDRD = 0x00;
     DDRE = 0x00;
 
-    Timer::initialize();
-    UART::initalize();
+    timer.enable(Timer::Fast);
+    UART::initalize(UART::BAUD_9600);
 
     //Enable Global Interrupts
     sei();
@@ -34,23 +38,28 @@ int main()
 {
     ioinit();
 
+    sampler.processingInput = false;
+
     LED greenLED(&PORTB, &DDRB, PINB0);
     greenLED.toggle(); // For debugging purposes only
 
     while(true) {
         // Send any byte that has been sampled
-        if (Timer::dataReady) {
+        if (sampler.dataReady) {
             //printf("%c", Timer::value);
-            Timer::dataReady = false;
+            sampler.dataReady = false;
         }
 
-        // If we get a byte from the UART, disable the timer for some time
-        if (!UART::inputBuffer.isEmpty() && Timer::prescaler == 0) {
+        /* If we get a byte from the UART (and are not in the middle of processing old data),
+         * slow the timer for some time to prevent its interrupt from starving the UART interrupt.
+         */
+        if (!UART::inputBuffer.isEmpty() && !sampler.processingInput) {
             // Delay for some time to allow all the input to come in
-            Timer::setWait(1);
+            timer.enable(Timer::Slow);
+            sampler.processingInput = true;
         }
 
-        // Get and print all characters in the buffer
+//        // Get and print all characters in the buffer
 //        while (!UART::inputBuffer.isEmpty()) {
 //            printf("%c", UART::inputBuffer.getChar());
 //        }
