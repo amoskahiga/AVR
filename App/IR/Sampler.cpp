@@ -39,6 +39,7 @@ void Sampler::setPinOutput()
 
         // Set the pin to the current state of the bit we read in
         bit_write(bit_get(data, BIT(bitCount)), PORTB, BIT(PINB0));
+        bit_write(bit_get(data, BIT(bitCount)), PORTB, BIT(PINB4));
 
         --bitCount;
 

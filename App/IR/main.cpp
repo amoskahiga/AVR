@@ -28,7 +28,7 @@ static void ioinit(void)
     DDRE = 0x00;
 
     timer.enable(Timer::Fast);
-    UART::initalize(UART::BAUD_9600);
+    UART::initalize(UART::BAUD_38400);
 
     //Enable Global Interrupts
     sei();
@@ -40,13 +40,14 @@ int main()
 
     sampler.processingInput = false;
 
+    LED irLED(&PORTB, &DDRB, PINB4);
     LED greenLED(&PORTB, &DDRB, PINB0);
     greenLED.toggle(); // For debugging purposes only
 
     while(true) {
         // Send any byte that has been sampled
         if (sampler.dataReady) {
-            //printf("%c", Timer::value);
+            printf("%c", sampler.value);
             sampler.dataReady = false;
         }
 
